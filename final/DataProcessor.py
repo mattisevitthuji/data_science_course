@@ -46,8 +46,6 @@ class DataProcessor:
         # Fill NA values in the column with the generated values
         temp_df.loc[temp_df['product_color'].isna(), 'product_color'] = fill_values
 
-        # na urgency_text with "No urgency text"
-        temp_df['urgency_text'] = temp_df['urgency_text'].fillna('No urgency text')
         print(temp_df.isna().sum())
         self.df = temp_df
 
@@ -72,11 +70,21 @@ class DataProcessor:
 
         # new feature that shows difference between actual price and retail price
         temp_df['price_diff'] = temp_df['price'] - temp_df['retail_price']
-        self.df = temp_df
+
+        # new feature that one hot encodes the most common colors
         temp_df = self.fix_color_col(temp_df)
         one_hot = pd.get_dummies(temp_df['product_color']).astype(int)
         temp_df = temp_df.drop(columns=['product_color'])
-        # Join the one-hot encoded dataframe with the original dataframe
+        temp_df = pd.concat([temp_df, one_hot], axis=1)
+
+        # new feature that one hot encodes if shipping_option_name is Livraison standard or not
+        temp_df['is_livraison_standard_shipping'] = np.where(temp_df['shipping_option_name'] == 'Livraison standard', 1,0)
+        temp_df = temp_df.drop(columns=['shipping_option_name'])
+
+        # new feature that one hot encodes if origin_country is CN or not
+        temp_df['origin_country'] = 'country_' + temp_df['origin_country']
+        one_hot = pd.get_dummies(temp_df['origin_country']).astype(int)
+        temp_df = temp_df.drop(columns=['origin_country'])
         temp_df = pd.concat([temp_df, one_hot], axis=1)
         self.df = temp_df
 
@@ -114,5 +122,5 @@ class DataProcessor:
         temp_df = temp_df.drop(
             columns=['merchant_profile_picture', 'merchant_info_subtitle', 'merchant_id', 'merchant_name',
                      'crawl_month', 'theme', 'product_picture', 'product_url', 'currency_buyer',
-                     'product_variation_size_id', 'product_id'])
+                     'product_variation_size_id', 'product_id', 'merchant_title', 'urgency_text'])
         self.df = temp_df
