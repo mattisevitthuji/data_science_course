@@ -9,9 +9,10 @@ class DataProcessor:
         self.df = df
 
     def clean_data(self):
-        self.drop_cols()
         self.fix_na()
         self.create_new_columns()
+
+        self.drop_cols()
         return self.df
 
     def fix_na(self):
@@ -45,8 +46,6 @@ class DataProcessor:
         fill_values = np.random.choice(colors, size=na_count, p=freqs / freqs.sum())
         # Fill NA values in the column with the generated values
         temp_df.loc[temp_df['product_color'].isna(), 'product_color'] = fill_values
-
-        print(temp_df.isna().sum())
         self.df = temp_df
 
     def create_new_columns(self):
@@ -74,7 +73,7 @@ class DataProcessor:
         # new feature that one hot encodes the most common colors
         temp_df = self.fix_color_col(temp_df)
         one_hot = pd.get_dummies(temp_df['product_color']).astype(int)
-        temp_df = temp_df.drop(columns=['product_color'])
+        # temp_df = temp_df.drop(columns=['product_color'])
         temp_df = pd.concat([temp_df, one_hot], axis=1)
 
         # new feature that one hot encodes if shipping_option_name is Livraison standard or not
@@ -82,37 +81,29 @@ class DataProcessor:
         temp_df = temp_df.drop(columns=['shipping_option_name'])
 
         # new feature that one hot encodes if origin_country is CN or not
-        temp_df['origin_country'] = 'country_' + temp_df['origin_country']
+        temp_df['origin_country'].replace("CN", "CHN", inplace=True)
+        temp_df['origin_country'].replace("US", "UAS", inplace=True)
+        temp_df['origin_country'].replace("VE", "VEN", inplace=True)
+        temp_df['origin_country'].replace("GB", "GBR", inplace=True)
+        temp_df['origin_country'].replace("AT", "AUT", inplace=True)
         one_hot = pd.get_dummies(temp_df['origin_country']).astype(int)
-        temp_df = temp_df.drop(columns=['origin_country'])
+        # temp_df = temp_df.drop(columns=['origin_country'])
         temp_df = pd.concat([temp_df, one_hot], axis=1)
         self.df = temp_df
 
+
     def fix_color_col(self, temp_df):
         temp_df['product_color'] = temp_df['product_color'].str.lower()
+        temp_df['product_color'].replace("grey", "gray", inplace=True)
         top_colors = temp_df['product_color'].value_counts().index[:18].tolist()
-        pd.set_option('display.max_rows', None)
 
         def match_colors(color_option):
             for color in top_colors:
-                if color in color_option: return "product_color_" + color
-            return "product_color_other"
+                if color in color_option: return color
+            return "other"
 
         temp_df['product_color'] = temp_df['product_color'].apply(match_colors)
-        # print unique product_color and count
-        print("\n\n\n", temp_df['product_color'].value_counts())
         return temp_df
-
-    def visualize_data(self):
-        # implement your data visualization here
-        # For example, a simple pairplot
-        sns.pairplot(self.df)
-        plt.show()
-
-    def explore_data(self):
-        # implement your data exploration here
-        # For example, show basic stats of the dataframe
-        print(self.df.describe())
 
     def drop_cols(self):
         # First we will drop columns that are not useful for our analysis - merchant_profile_picture,

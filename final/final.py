@@ -9,4 +9,4 @@ if __name__ == '__main__':
     data_processor.clean_data()
     DataExplorer(data_processor.df).basic_stats()
     DataExplorer(data_processor.df).visualize_data()
-    # data.to_pickle('data.pkl')
+    # data processor.df is the cleaned data
