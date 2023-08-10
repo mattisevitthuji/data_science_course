@@ -19,21 +19,21 @@ class DataSet:
         print(self.df.isna().sum(), "\n")
         # print if any customer ids are duplicated
         print("Number of duplicated customer ids: ", self.df['Customer_Id'].duplicated().sum(), "\n")
-        # numerical_columns = self.df.select_dtypes(include=[np.number])
-        # if not numerical_columns.empty:
-        #     numerical_stats = numerical_columns.agg(['mean', 'median', 'std'])
-        #     print("Statistics for numerical columns:")
-        #     print(numerical_stats)
-        # else:
-        #     print("No numerical columns found.")
-        #
-        # categorical_columns = self.df.select_dtypes(include=['object', 'category'])
-        # if not categorical_columns.empty:
-        #     print("\nFrequency distribution for categorical columns:")
-        #     for column in categorical_columns:
-        #         freq_dist = ((self.df[column].value_counts() / len(df)) * 100).astype(str) + ' %'
-        #         print(f"\nColumn: {column}")
-        #         print(freq_dist)
+        numerical_columns = self.df.select_dtypes(include=[np.number])
+        if not numerical_columns.empty:
+            numerical_stats = numerical_columns.agg(['mean', 'median', 'std'])
+            print("Statistics for numerical columns:")
+            print(numerical_stats)
+        else:
+            print("No numerical columns found.")
+
+        categorical_columns = self.df.select_dtypes(include=['object', 'category'])
+        if not categorical_columns.empty:
+            print("\nFrequency distribution for categorical columns:")
+            for column in categorical_columns:
+                freq_dist = ((self.df[column].value_counts() / len(df)) * 100).astype(str) + ' %'
+                print(f"\nColumn: {column}")
+                print(freq_dist)
 
     def visualize_data(self):
         sns.set_palette('bright')
@@ -46,6 +46,7 @@ class DataSet:
             plt.title(f"Histogram of {column}", **font_title)
             plt.xlabel(column, **font_label)
             plt.ylabel("Frequency", **font_label)
+            plt.show()
             plt.show()
         for column in numerical_columns:
             plt.figure()
